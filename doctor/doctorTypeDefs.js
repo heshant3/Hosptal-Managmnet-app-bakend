@@ -32,6 +32,7 @@ const typeDefs = gql`
 
   type Query {
     getAllDoctorsData: [DoctorData]
+    getDoctorDataById(doctor_id: Int!): DoctorData
   }
 
   type Mutation {

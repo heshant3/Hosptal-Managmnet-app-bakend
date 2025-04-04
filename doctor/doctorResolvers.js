@@ -4,6 +4,7 @@ const {
   getAllDoctorsData,
   updateDoctorData,
   deleteDoctor,
+  getDoctorDataById,
 } = require("./doctorData");
 
 const resolvers = {
@@ -68,6 +69,13 @@ const resolvers = {
         return await getAllDoctorsData();
       } catch (err) {
         throw new Error("Error fetching doctors' data: " + err.message);
+      }
+    },
+    getDoctorDataById: async (_, { doctor_id }) => {
+      try {
+        return await getDoctorDataById(doctor_id);
+      } catch (err) {
+        throw new Error("Error fetching doctor data: " + err.message);
       }
     },
   },

@@ -60,6 +60,24 @@ async function getAllDoctorsData() {
   }
 }
 
+// Function to fetch a doctor's data by doctor_id
+async function getDoctorDataById(doctor_id) {
+  const selectQuery = `
+    SELECT * FROM "doctorData"
+    WHERE doctor_id = $1;
+  `;
+  try {
+    const result = await pool.query(selectQuery, [doctor_id]);
+    if (result.rows.length === 0) {
+      throw new Error("No doctor data found for the given doctor_id.");
+    }
+    return result.rows[0];
+  } catch (err) {
+    console.error("Error fetching doctor data by ID:", err);
+    throw err;
+  }
+}
+
 // Function to update a doctor's data
 async function updateDoctorData(doctor_id, name, specialization, contact) {
   const updateQuery = `
@@ -108,6 +126,7 @@ module.exports = {
   createDoctorDataTable,
   addDoctorData,
   getAllDoctorsData,
+  getDoctorDataById,
   updateDoctorData,
   deleteDoctor,
 };
