@@ -56,6 +56,11 @@ const typeDefs = gql`
       mobile_number: String!
     ): AddPatientDataResponse
     deletePatient(patient_id: Int!): DeletePatientResponse
+    updatePatientCredentials(
+      patient_id: Int!
+      email: String!
+      password: String!
+    ): DeletePatientResponse
   }
 `;
 

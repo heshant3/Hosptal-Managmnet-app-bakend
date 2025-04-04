@@ -61,6 +61,26 @@ async function Login(email, password) {
   }
 }
 
+// Function to update patient credentials
+async function updatePatientCredentials(patient_id, email, password) {
+  const updateQuery = `
+    UPDATE "Patient"
+    SET email = $1, password = $2
+    WHERE id = $3
+    RETURNING id, email;
+  `;
+  try {
+    const result = await pool.query(updateQuery, [email, password, patient_id]);
+    if (result.rows.length === 0) {
+      throw new Error("Patient not found or update failed.");
+    }
+    return result.rows[0];
+  } catch (err) {
+    console.error("Error updating patient credentials:", err);
+    throw err;
+  }
+}
+
 // Function to create the patientsData table
 async function createPatientsDataTable() {
   const createTableQuery = `
@@ -103,4 +123,10 @@ const resolvers = {
   },
 };
 
-module.exports = { addPatient, Login, createPatientsDataTable, resolvers };
+module.exports = {
+  addPatient,
+  Login,
+  createPatientsDataTable,
+  updatePatientCredentials,
+  resolvers,
+};

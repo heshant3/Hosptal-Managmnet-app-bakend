@@ -1,4 +1,4 @@
-const { addPatient, Login } = require("./auth");
+const { addPatient, Login, updatePatientCredentials } = require("./auth");
 const {
   addPatientData,
   getAllPatientsData,
@@ -63,6 +63,21 @@ const resolvers = {
         return {
           patient: deletedPatient,
           message: "Patient deleted successfully.",
+        };
+      } catch (err) {
+        return { patient: null, message: err.message };
+      }
+    },
+    updatePatientCredentials: async (_, { patient_id, email, password }) => {
+      try {
+        const updatedCredentials = await updatePatientCredentials(
+          patient_id,
+          email,
+          password
+        );
+        return {
+          patient: updatedCredentials,
+          message: "Patient credentials updated successfully.",
         };
       } catch (err) {
         return { patient: null, message: err.message };
