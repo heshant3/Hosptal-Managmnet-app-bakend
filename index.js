@@ -5,19 +5,27 @@ const patientTypeDefs = require("./patients/patientsTypeDefs");
 const patientResolvers = require("./patients/patientsResolvers");
 const doctorTypeDefs = require("./doctor/doctorTypeDefs");
 const doctorResolvers = require("./doctor/doctorResolvers");
+const docSchedulesTypeDefs = require("./DocSchedules/DocSchedulesTypeDefs");
+const docSchedulesResolvers = require("./DocSchedules/DocSchedulesresolvers");
 
 // Merge typeDefs
-const typeDefs = mergeTypeDefs([patientTypeDefs, doctorTypeDefs]);
+const typeDefs = mergeTypeDefs([
+  patientTypeDefs,
+  doctorTypeDefs,
+  docSchedulesTypeDefs,
+]);
 
 // Merge resolvers
 const resolvers = {
   Query: {
     ...patientResolvers.Query,
     ...doctorResolvers.Query,
+    ...docSchedulesResolvers.Query,
   },
   Mutation: {
     ...patientResolvers.Mutation,
     ...doctorResolvers.Mutation,
+    ...docSchedulesResolvers.Mutation,
   },
 };
 

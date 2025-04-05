@@ -10,6 +10,7 @@ const typeDefs = gql`
 
   type DoctorData {
     id: ID
+    doctor_id: Int
     name: String
     specialization: String
     contact: String
@@ -37,6 +38,7 @@ const typeDefs = gql`
   type Query {
     getAllDoctorsData: [DoctorData]
     getDoctorDataById(doctor_id: Int!): DoctorData
+    getDoctorBasicInfoById(doctor_id: Int!): DoctorData
   }
 
   type Mutation {

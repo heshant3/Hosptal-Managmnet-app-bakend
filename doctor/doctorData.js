@@ -94,6 +94,25 @@ async function getDoctorDataById(doctor_id) {
   }
 }
 
+// Function to fetch basic doctor information by doctor_id
+async function getDoctorBasicInfoById(doctor_id) {
+  const selectQuery = `
+    SELECT id AS doctor_id, name, specialization, qualifications
+    FROM "doctorData"
+    WHERE doctor_id = $1;
+  `;
+  try {
+    const result = await pool.query(selectQuery, [doctor_id]);
+    if (result.rows.length === 0) {
+      throw new Error("No doctor data found for the given doctor_id.");
+    }
+    return result.rows[0];
+  } catch (err) {
+    console.error("Error fetching basic doctor info by ID:", err);
+    throw err;
+  }
+}
+
 // Function to update a doctor's data
 async function updateDoctorData(
   doctor_id,
@@ -154,6 +173,7 @@ module.exports = {
   addDoctorData,
   getAllDoctorsData,
   getDoctorDataById,
+  getDoctorBasicInfoById,
   updateDoctorData,
   deleteDoctor,
 };
