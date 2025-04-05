@@ -94,7 +94,7 @@ const resolvers = {
     },
     getPatientDataById: async (_, { patient_id }) => {
       try {
-        return await getPatientDataById(patient_id);
+        return await getPatientDataById(patient_id); // Now includes email
       } catch (err) {
         throw new Error("Error fetching patient data: " + err.message);
       }

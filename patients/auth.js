@@ -67,7 +67,7 @@ async function updatePatientCredentials(patient_id, email, password) {
     UPDATE "Patient"
     SET email = $1, password = $2
     WHERE id = $3
-    RETURNING id, email;
+    RETURNING id, email, password;
   `;
   try {
     const result = await pool.query(updateQuery, [email, password, patient_id]);

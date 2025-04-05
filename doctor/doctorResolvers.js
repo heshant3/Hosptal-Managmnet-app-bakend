@@ -1,4 +1,8 @@
-const { addDoctor, LoginDoctor } = require("./doctorAuth");
+const {
+  addDoctor,
+  LoginDoctor,
+  updateDoctorCredentials,
+} = require("./doctorAuth");
 const {
   addDoctorData,
   getAllDoctorsData,
@@ -6,6 +10,15 @@ const {
   deleteDoctor,
   getDoctorDataById,
 } = require("./doctorData");
+
+const formatDoctorData = (doctorData) => {
+  if (doctorData.date_of_birth) {
+    doctorData.date_of_birth = new Date(doctorData.date_of_birth)
+      .toISOString()
+      .split("T")[0];
+  }
+  return doctorData;
+};
 
 const resolvers = {
   Mutation: {
@@ -19,13 +32,27 @@ const resolvers = {
         : "Invalid email or password.";
       return response;
     },
-    addDoctorData: async (_, { name, specialization, contact, doctor_id }) => {
+    addDoctorData: async (
+      _,
+      {
+        name,
+        specialization,
+        contact,
+        doctor_id,
+        address,
+        date_of_birth,
+        qualifications,
+      }
+    ) => {
       try {
         const doctorData = await addDoctorData(
           name,
           specialization,
           contact,
-          doctor_id
+          doctor_id,
+          address,
+          date_of_birth,
+          qualifications
         );
         return { doctorData, message: "Doctor data added successfully." };
       } catch (err) {
@@ -34,17 +61,28 @@ const resolvers = {
     },
     updateDoctorData: async (
       _,
-      { doctor_id, name, specialization, contact }
+      {
+        doctor_id,
+        name,
+        specialization,
+        contact,
+        address,
+        date_of_birth,
+        qualifications,
+      }
     ) => {
       try {
         const updatedDoctorData = await updateDoctorData(
           doctor_id,
           name,
           specialization,
-          contact
+          contact,
+          address,
+          date_of_birth,
+          qualifications
         );
         return {
-          doctorData: updatedDoctorData,
+          doctorData: formatDoctorData(updatedDoctorData),
           message: "Doctor data updated successfully.",
         };
       } catch (err) {
@@ -62,6 +100,18 @@ const resolvers = {
         return { doctor: null, message: err.message };
       }
     },
+    updateDoctorCredentials: async (_, { doctor_id, email, password }) => {
+      try {
+        const updatedDoctor = await updateDoctorCredentials(
+          doctor_id,
+          email,
+          password
+        );
+        return updatedDoctor;
+      } catch (err) {
+        throw new Error("Error updating doctor credentials: " + err.message);
+      }
+    },
   },
   Query: {
     getAllDoctorsData: async () => {
@@ -73,7 +123,8 @@ const resolvers = {
     },
     getDoctorDataById: async (_, { doctor_id }) => {
       try {
-        return await getDoctorDataById(doctor_id);
+        const doctorData = await getDoctorDataById(doctor_id);
+        return formatDoctorData(doctorData); // email will now be included
       } catch (err) {
         throw new Error("Error fetching doctor data: " + err.message);
       }

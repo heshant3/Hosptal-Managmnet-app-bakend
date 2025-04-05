@@ -9,6 +9,9 @@ async function createDoctorDataTable() {
       name VARCHAR(255) NOT NULL,
       specialization VARCHAR(255) NOT NULL,
       contact VARCHAR(15) NOT NULL,
+      address TEXT,
+      date_of_birth DATE,
+      qualifications TEXT,
       doctor_id INT NOT NULL,
       CONSTRAINT fk_doctor
         FOREIGN KEY (doctor_id)
@@ -26,10 +29,18 @@ async function createDoctorDataTable() {
 }
 
 // Function to add a doctor's data
-async function addDoctorData(name, specialization, contact, doctor_id) {
+async function addDoctorData(
+  name,
+  specialization,
+  contact,
+  doctor_id,
+  address,
+  date_of_birth,
+  qualifications
+) {
   const insertQuery = `
-    INSERT INTO "doctorData" (name, specialization, contact, doctor_id)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO "doctorData" (name, specialization, contact, doctor_id, address, date_of_birth, qualifications)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *;
   `;
   try {
@@ -38,6 +49,9 @@ async function addDoctorData(name, specialization, contact, doctor_id) {
       specialization,
       contact,
       doctor_id,
+      address,
+      date_of_birth,
+      qualifications,
     ]);
     return result.rows[0];
   } catch (err) {
@@ -63,8 +77,10 @@ async function getAllDoctorsData() {
 // Function to fetch a doctor's data by doctor_id
 async function getDoctorDataById(doctor_id) {
   const selectQuery = `
-    SELECT * FROM "doctorData"
-    WHERE doctor_id = $1;
+    SELECT d.*, doc.email
+    FROM "doctorData" d
+    JOIN "Doctor" doc ON d.doctor_id = doc.id
+    WHERE d.doctor_id = $1;
   `;
   try {
     const result = await pool.query(selectQuery, [doctor_id]);
@@ -79,11 +95,19 @@ async function getDoctorDataById(doctor_id) {
 }
 
 // Function to update a doctor's data
-async function updateDoctorData(doctor_id, name, specialization, contact) {
+async function updateDoctorData(
+  doctor_id,
+  name,
+  specialization,
+  contact,
+  address,
+  date_of_birth,
+  qualifications
+) {
   const updateQuery = `
     UPDATE "doctorData"
-    SET name = $1, specialization = $2, contact = $3
-    WHERE doctor_id = $4
+    SET name = $1, specialization = $2, contact = $3, address = $4, date_of_birth = $5, qualifications = $6
+    WHERE doctor_id = $7
     RETURNING *;
   `;
   try {
@@ -91,6 +115,9 @@ async function updateDoctorData(doctor_id, name, specialization, contact) {
       name,
       specialization,
       contact,
+      address,
+      date_of_birth,
+      qualifications,
       doctor_id,
     ]);
     if (result.rows.length === 0) {

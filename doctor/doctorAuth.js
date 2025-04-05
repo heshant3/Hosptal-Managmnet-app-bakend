@@ -76,4 +76,29 @@ async function createDoctorTable() {
   }
 }
 
-module.exports = { addDoctor, LoginDoctor, createDoctorTable };
+// Function to update doctor credentials
+async function updateDoctorCredentials(doctor_id, email, password) {
+  const updateQuery = `
+    UPDATE "Doctor"
+    SET email = COALESCE($1, email), password = COALESCE($2, password)
+    WHERE id = $3
+    RETURNING *;
+  `;
+  try {
+    const result = await pool.query(updateQuery, [email, password, doctor_id]);
+    if (result.rows.length === 0) {
+      throw new Error("No doctor found for the given doctor_id.");
+    }
+    return result.rows[0];
+  } catch (err) {
+    console.error("Error updating doctor credentials:", err);
+    throw err;
+  }
+}
+
+module.exports = {
+  addDoctor,
+  LoginDoctor,
+  createDoctorTable,
+  updateDoctorCredentials,
+};

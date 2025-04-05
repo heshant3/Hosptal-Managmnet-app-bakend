@@ -119,9 +119,10 @@ async function deletePatient(patient_id) {
 // Function to fetch patient data by ID
 async function getPatientDataById(patient_id) {
   const query = `
-    SELECT id, name, address, TO_CHAR(dob, 'YYYY-MM-DD') AS dob, age, mobile_number
-    FROM "patientsData"
-    WHERE patient_id = $1;
+    SELECT pd.id, pd.name, pd.address, TO_CHAR(pd.dob, 'YYYY-MM-DD') AS dob, pd.age, pd.mobile_number, p.email
+    FROM "patientsData" pd
+    JOIN "Patient" p ON pd.patient_id = p.id
+    WHERE pd.patient_id = $1;
   `;
   try {
     const result = await pool.query(query, [patient_id]);

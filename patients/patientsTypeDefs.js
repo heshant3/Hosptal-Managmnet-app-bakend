@@ -14,6 +14,7 @@ const typeDefs = gql`
     address: String
     dob: String
     mobile_number: String
+    email: String
   }
 
   type AddPatientDataResponse {
@@ -41,25 +42,25 @@ const typeDefs = gql`
     addPatient(email: String!, password: String!): Patient
     Login(email: String!, password: String!): LoginResponse
     addPatientData(
-      name: String!
-      address: String!
-      dob: String!
-      age: Int!
-      mobile_number: String!
-      patient_id: Int!
+      name: String
+      address: String
+      dob: String
+      age: Int
+      mobile_number: String
+      patient_id: Int
     ): AddPatientDataResponse
     updatePatientData(
       patient_id: Int!
-      name: String!
-      address: String!
-      dob: String!
-      mobile_number: String!
+      name: String
+      address: String
+      dob: String
+      mobile_number: String
     ): AddPatientDataResponse
     deletePatient(patient_id: Int!): DeletePatientResponse
     updatePatientCredentials(
       patient_id: Int!
-      email: String!
-      password: String!
+      email: String
+      password: String
     ): DeletePatientResponse
   }
 `;

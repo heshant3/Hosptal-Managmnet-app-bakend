@@ -13,6 +13,10 @@ const typeDefs = gql`
     name: String
     specialization: String
     contact: String
+    address: String
+    date_of_birth: String
+    qualifications: String
+    email: String
   }
 
   type AddDoctorDataResponse {
@@ -40,17 +44,28 @@ const typeDefs = gql`
     LoginDoctor(email: String!, password: String!): LoginDoctorResponse
     addDoctorData(
       name: String!
-      specialization: String!
-      contact: String!
-      doctor_id: Int!
+      specialization: String
+      contact: String
+      doctor_id: Int
+      address: String
+      date_of_birth: String
+      qualifications: String
     ): AddDoctorDataResponse
     updateDoctorData(
       doctor_id: Int!
-      name: String!
-      specialization: String!
-      contact: String!
+      name: String
+      specialization: String
+      contact: String
+      address: String
+      date_of_birth: String
+      qualifications: String
     ): AddDoctorDataResponse
     deleteDoctor(doctor_id: Int!): DeleteDoctorResponse
+    updateDoctorCredentials(
+      doctor_id: Int!
+      email: String
+      password: String
+    ): Doctor
   }
 `;
 
