@@ -51,16 +51,26 @@ const resolvers = {
         schedule_id, // Added new field
       }
     ) => {
-      const query = `
+      const appointmentQuery = `
         INSERT INTO "Appointment" (
           doc_id, doc_name, hospital_name, doc_specialist, available_day, session_time,
           appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) -- Updated to include $14
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING *;
       `;
+      const updateScheduleQuery = `
+        UPDATE "DocSchedules"
+        SET total_patients = total_patients - 1
+        WHERE id = $1 AND total_patients > 0
+        RETURNING total_patients; -- Ensure the updated value is returned
+      `;
       try {
-        const result = await pool.query(query, [
+        // Start a transaction
+        await pool.query("BEGIN");
+
+        // Insert the appointment
+        const appointmentResult = await pool.query(appointmentQuery, [
           doc_id,
           doc_name,
           hospital_name,
@@ -74,13 +84,29 @@ const resolvers = {
           patient_name,
           patient_dob,
           patient_phone,
-          schedule_id, // Added new field
+          schedule_id,
         ]);
+
+        // Update the total_patients in DocSchedules
+        const scheduleResult = await pool.query(updateScheduleQuery, [
+          schedule_id,
+        ]);
+        if (scheduleResult.rows.length === 0) {
+          throw new Error(
+            "Failed to update schedule: No patients left or invalid schedule ID."
+          );
+        }
+
+        // Commit the transaction
+        await pool.query("COMMIT");
+
         return {
-          appointment: result.rows[0],
-          message: "Appointment added successfully.",
+          appointment: appointmentResult.rows[0],
+          message: `Appointment added successfully. Remaining patients: ${scheduleResult.rows[0].total_patients}`,
         };
       } catch (err) {
+        // Rollback the transaction in case of an error
+        await pool.query("ROLLBACK");
         return { appointment: null, message: err.message };
       }
     },
