@@ -12,6 +12,7 @@ const typeDefs = gql`
     name: String
     specialty: String
     qualifications: String
+    YourTime: String
   }
 
   type Doctor {
@@ -59,6 +60,7 @@ const typeDefs = gql`
       day: String!
       time: String!
       onePatientDuration: Int!
+      YourTime: String!
     ): AddDocScheduleResponse
     deleteDocSchedule(schedule_id: Int!): DeleteDocScheduleResponse
   }

@@ -5,7 +5,7 @@ const resolvers = {
   Query: {
     getAllDocSchedules: async () => {
       const query = `
-        SELECT ds.*, dd.name, dd.specialization AS specialty, dd.qualifications
+        SELECT ds.*, dd.name, dd.specialization AS specialty, dd.qualifications, ds."YourTime"
         FROM "DocSchedules" ds
         JOIN "doctorData" dd ON ds.doctor_id = dd.id;
       `;
@@ -17,7 +17,7 @@ const resolvers = {
       }
     },
     getDocScheduleByDoctorId: async (_, { doctor_id }) => {
-      const query = `SELECT * FROM "DocSchedules" WHERE doctor_id = $1;`;
+      const query = `SELECT *, "YourTime" FROM "DocSchedules" WHERE doctor_id = $1;`;
       try {
         const result = await pool.query(query, [doctor_id]);
         return result.rows;
@@ -40,7 +40,7 @@ const resolvers = {
     getDoctorDetailsById: async (_, { doctor_id }) => {
       const query = `
         SELECT ds.id, ds.doctor_id, dd.name, dd.specialization AS specialty, dd.qualifications,
-               ds.hospital_name, ds.total_patients, ds.day, ds.time, ds."onePatientDuration"
+               ds.hospital_name, ds.total_patients, ds.day, ds.time, ds."onePatientDuration", ds."YourTime"
         FROM "DocSchedules" ds
         JOIN "doctorData" dd ON ds.doctor_id = dd.id
         WHERE ds.doctor_id = $1;
@@ -70,11 +70,14 @@ const resolvers = {
         day,
         time,
         onePatientDuration,
+        YourTime,
       }
     ) => {
       const query = `
-        INSERT INTO "DocSchedules" (doctor_id, hospital_name, total_patients, day, time, "onePatientDuration")
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO "DocSchedules" (
+          doctor_id, hospital_name, total_patients, day, time, "onePatientDuration", "YourTime"
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, $5)) -- Default "YourTime" to "time" if not provided
         RETURNING *;
       `;
       try {
@@ -85,6 +88,7 @@ const resolvers = {
           day,
           time,
           onePatientDuration,
+          YourTime,
         ]);
         return {
           schedule: result.rows[0],

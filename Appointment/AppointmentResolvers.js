@@ -48,7 +48,7 @@ const resolvers = {
         patient_name,
         patient_dob,
         patient_phone,
-        schedule_id, // Added new field
+        schedule_id,
       }
     ) => {
       const appointmentQuery = `
@@ -61,9 +61,17 @@ const resolvers = {
       `;
       const updateScheduleQuery = `
         UPDATE "DocSchedules"
-        SET total_patients = total_patients - 1
+        SET total_patients = total_patients - 1,
+            "YourTime" = (
+              SELECT TO_CHAR(
+                TO_TIMESTAMP("YourTime", 'HH24:MI') + INTERVAL '1 minute' * "onePatientDuration",
+                'HH24:MI'
+              )
+              FROM "DocSchedules"
+              WHERE id = $1
+            )
         WHERE id = $1 AND total_patients > 0
-        RETURNING total_patients; -- Ensure the updated value is returned
+        RETURNING total_patients, "YourTime";
       `;
       try {
         // Start a transaction
@@ -87,7 +95,7 @@ const resolvers = {
           schedule_id,
         ]);
 
-        // Update the total_patients in DocSchedules
+        // Update the total_patients and YourTime in DocSchedules
         const scheduleResult = await pool.query(updateScheduleQuery, [
           schedule_id,
         ]);
@@ -102,7 +110,7 @@ const resolvers = {
 
         return {
           appointment: appointmentResult.rows[0],
-          message: `Appointment added successfully. Remaining patients: ${scheduleResult.rows[0].total_patients}`,
+          message: `Appointment added successfully. Remaining patients: ${scheduleResult.rows[0].total_patients}, Next available time: ${scheduleResult.rows[0].YourTime}`,
         };
       } catch (err) {
         // Rollback the transaction in case of an error
