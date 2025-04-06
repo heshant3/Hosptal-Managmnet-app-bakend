@@ -9,6 +9,8 @@ const docSchedulesTypeDefs = require("./DocSchedules/DocSchedulesTypeDefs");
 const docSchedulesResolvers = require("./DocSchedules/DocSchedulesresolvers");
 const appointmentTypeDefs = require("./Appointment/AppointmentTypeDefs");
 const appointmentResolvers = require("./Appointment/AppointmentResolvers");
+const adminTypeDefs = require("./admin/adminTypeDefs");
+const adminResolvers = require("./admin/adminResolvers");
 
 // Merge typeDefs
 const typeDefs = mergeTypeDefs([
@@ -16,6 +18,7 @@ const typeDefs = mergeTypeDefs([
   doctorTypeDefs,
   docSchedulesTypeDefs,
   appointmentTypeDefs, // Added Appointment typeDefs
+  adminTypeDefs, // Added Admin typeDefs
 ]);
 
 // Merge resolvers
@@ -25,12 +28,14 @@ const resolvers = {
     ...doctorResolvers.Query,
     ...docSchedulesResolvers.Query,
     ...appointmentResolvers.Query, // Added Appointment resolvers for Query
+    ...adminResolvers.Query, // Added Admin resolvers for Query
   },
   Mutation: {
     ...patientResolvers.Mutation,
     ...doctorResolvers.Mutation,
     ...docSchedulesResolvers.Mutation,
     ...appointmentResolvers.Mutation, // Added Appointment resolvers for Mutation
+    ...adminResolvers.Mutation, // Added Admin resolvers for Mutation
   },
 };
 
