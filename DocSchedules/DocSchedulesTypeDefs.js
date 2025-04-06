@@ -60,7 +60,6 @@ const typeDefs = gql`
       day: String!
       time: String!
       onePatientDuration: Int!
-      YourTime: String!
     ): AddDocScheduleResponse
     deleteDocSchedule(schedule_id: Int!): DeleteDocScheduleResponse
   }

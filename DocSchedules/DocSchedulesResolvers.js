@@ -70,14 +70,13 @@ const resolvers = {
         day,
         time,
         onePatientDuration,
-        YourTime,
       }
     ) => {
       const query = `
         INSERT INTO "DocSchedules" (
-          doctor_id, hospital_name, total_patients, day, time, "onePatientDuration", "YourTime"
+          doctor_id, hospital_name, total_patients, day, time, "onePatientDuration"
         )
-        VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, $5)) -- Default "YourTime" to "time" if not provided
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *;
       `;
       try {
@@ -88,7 +87,6 @@ const resolvers = {
           day,
           time,
           onePatientDuration,
-          YourTime,
         ]);
         return {
           schedule: result.rows[0],
