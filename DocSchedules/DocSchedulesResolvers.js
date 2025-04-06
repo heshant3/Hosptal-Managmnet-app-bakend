@@ -5,22 +5,28 @@ const resolvers = {
   Query: {
     getAllDocSchedules: async () => {
       const query = `
-        SELECT ds.*, dd.name, dd.specialization AS specialty, dd.qualifications, ds."YourTime"
+        SELECT ds.*, dd.name, dd.specialization AS specialty, dd.qualifications, ds."YourTime", ds.price
         FROM "DocSchedules" ds
         JOIN "doctorData" dd ON ds.doctor_id = dd.id;
       `;
       try {
         const result = await pool.query(query);
-        return result.rows;
+        return result.rows.map((row) => ({
+          ...row,
+          price: parseInt(row.price, 10),
+        }));
       } catch (err) {
         throw new Error("Error fetching schedules: " + err.message);
       }
     },
     getDocScheduleByDoctorId: async (_, { doctor_id }) => {
-      const query = `SELECT *, "YourTime" FROM "DocSchedules" WHERE doctor_id = $1;`;
+      const query = `SELECT *, "YourTime", price FROM "DocSchedules" WHERE doctor_id = $1;`;
       try {
         const result = await pool.query(query, [doctor_id]);
-        return result.rows;
+        return result.rows.map((row) => ({
+          ...row,
+          price: parseInt(row.price, 10),
+        }));
       } catch (err) {
         throw new Error("Error fetching schedules: " + err.message);
       }
@@ -40,14 +46,17 @@ const resolvers = {
     getDoctorDetailsById: async (_, { doctor_id }) => {
       const query = `
         SELECT ds.id, ds.doctor_id, dd.name, dd.specialization AS specialty, dd.qualifications,
-               ds.hospital_name, ds.total_patients, ds.day, ds.time, ds."onePatientDuration", ds."YourTime"
+               ds.hospital_name, ds.total_patients, ds.day, ds.time, ds."onePatientDuration", ds."YourTime", ds.price
         FROM "DocSchedules" ds
         JOIN "doctorData" dd ON ds.doctor_id = dd.id
         WHERE ds.doctor_id = $1;
       `;
       try {
         const result = await pool.query(query, [doctor_id]);
-        return result.rows;
+        return result.rows.map((row) => ({
+          ...row,
+          price: parseInt(row.price, 10),
+        }));
       } catch (err) {
         throw new Error("Error fetching doctor details: " + err.message);
       }
@@ -70,13 +79,14 @@ const resolvers = {
         day,
         time,
         onePatientDuration,
+        price,
       }
     ) => {
       const query = `
         INSERT INTO "DocSchedules" (
-          doctor_id, hospital_name, total_patients, day, time, "onePatientDuration"
+          doctor_id, hospital_name, total_patients, day, time, "onePatientDuration", price
         )
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *;
       `;
       try {
@@ -87,9 +97,13 @@ const resolvers = {
           day,
           time,
           onePatientDuration,
+          parseInt(price, 10),
         ]);
         return {
-          schedule: result.rows[0],
+          schedule: {
+            ...result.rows[0],
+            price: parseInt(result.rows[0].price, 10),
+          },
           message: "Schedule added successfully.",
         };
       } catch (err) {
@@ -108,7 +122,10 @@ const resolvers = {
           throw new Error("No schedule found with the given ID.");
         }
         return {
-          schedule: result.rows[0],
+          schedule: {
+            ...result.rows[0],
+            price: parseInt(result.rows[0].price, 10),
+          },
           message: "Schedule deleted successfully.",
         };
       } catch (err) {

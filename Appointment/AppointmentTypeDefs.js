@@ -18,6 +18,8 @@ const typeDefs = gql`
     patient_phone: String
     schedule_id: Int
     yourTime: String
+    status: String
+    price: Int
   }
 
   type AddAppointmentResponse {
@@ -30,6 +32,16 @@ const typeDefs = gql`
     message: String
   }
 
+  type CancelAppointmentsResponse {
+    appointments: [Appointment]
+    message: String
+  }
+
+  type CancelAppointmentResponse {
+    appointment: Appointment
+    message: String
+  }
+
   type Query {
     getAppointmentsByPatientId(patient_id: Int!): [Appointment]
     getAppointmentsByDoctorId(doc_id: Int!): [Appointment]
@@ -38,6 +50,7 @@ const typeDefs = gql`
   type Mutation {
     addAppointment(input: AddAppointmentInput!): AddAppointmentResponse
     deleteAppointment(appointment_id: Int!): DeleteAppointmentResponse
+    cancelAppointmentById(appointment_id: Int!): CancelAppointmentResponse
   }
 
   input AddAppointmentInput {
@@ -56,6 +69,8 @@ const typeDefs = gql`
     patient_phone: String
     schedule_id: Int
     yourTime: String
+    status: String
+    price: Int
   }
 `;
 

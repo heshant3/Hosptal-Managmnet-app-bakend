@@ -48,14 +48,15 @@ const resolvers = {
         patient_phone,
         schedule_id,
         yourTime, // This will now be dynamically calculated
+        price, // Added price field
       } = input;
 
       const appointmentQuery = `
         INSERT INTO "Appointment" (
           doc_id, doc_name, hospital_name, doc_specialist, available_day, session_time,
-          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id, "yourTime"
+          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id, "yourTime", status, price
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING *;
       `;
 
@@ -139,6 +140,8 @@ const resolvers = {
           patient_phone,
           schedule_id,
           nextYourTime, // Use the calculated "YourTime"
+          "Confirmed", // Set status to "confirmed"
+          price, // Added price value
         ]);
 
         // Commit the transaction
@@ -168,6 +171,26 @@ const resolvers = {
         return {
           appointment: result.rows[0],
           message: "Appointment deleted successfully.",
+        };
+      } catch (err) {
+        return { appointment: null, message: err.message };
+      }
+    },
+    cancelAppointmentById: async (_, { appointment_id }) => {
+      const query = `
+        UPDATE "Appointment"
+        SET status = 'Cancelled'
+        WHERE id = $1
+        RETURNING *;
+      `;
+      try {
+        const result = await pool.query(query, [appointment_id]);
+        if (result.rows.length === 0) {
+          throw new Error("No appointment found with the given ID.");
+        }
+        return {
+          appointment: result.rows[0],
+          message: "Appointment canceled successfully.",
         };
       } catch (err) {
         return { appointment: null, message: err.message };
