@@ -16,6 +16,7 @@ const typeDefs = gql`
     patient_name: String
     patient_dob: String
     patient_phone: String
+    patient_email: String
     schedule_id: Int
     yourTime: String
     status: String
@@ -67,6 +68,7 @@ const typeDefs = gql`
     patient_name: String
     patient_dob: String
     patient_phone: String
+    patient_email: String
     schedule_id: Int
     yourTime: String
     status: String

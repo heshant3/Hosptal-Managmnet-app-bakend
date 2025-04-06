@@ -46,6 +46,7 @@ const resolvers = {
         patient_name,
         patient_dob,
         patient_phone,
+        patient_email, // Added patient_email field
         schedule_id,
         yourTime, // This will now be dynamically calculated
         price, // Added price field
@@ -54,9 +55,9 @@ const resolvers = {
       const appointmentQuery = `
         INSERT INTO "Appointment" (
           doc_id, doc_name, hospital_name, doc_specialist, available_day, session_time,
-          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id, "yourTime", status, price
+          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, patient_email, schedule_id, "yourTime", status, price
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING *;
       `;
 
@@ -138,6 +139,7 @@ const resolvers = {
           patient_name,
           patient_dob,
           patient_phone,
+          patient_email, // Added patient_email value
           schedule_id,
           nextYourTime, // Use the calculated "YourTime"
           "Confirmed", // Set status to "confirmed"

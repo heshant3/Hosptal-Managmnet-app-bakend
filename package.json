@@ -19,6 +19,7 @@
     "express-graphql": "^0.12.0",
     "graphql": "^16.10.0",
     "graphql-ws": "^6.0.4",
+    "nodemailer": "^6.10.0",
     "pg": "^8.14.1",
     "subscriptions-transport-ws": "^0.11.0",
     "ws": "^8.18.1"
