@@ -38,9 +38,8 @@ const resolvers = {
         doc_name,
         hospital_name,
         doc_specialist,
-        available_day, // Ensure this is treated as a string
+        available_day,
         session_time,
-        appointment_number,
         reason,
         image_url,
         patient_id,
@@ -48,7 +47,7 @@ const resolvers = {
         patient_dob,
         patient_phone,
         schedule_id,
-        yourTime, // Added yourTime field
+        yourTime, // This will now be dynamically calculated
       } = input;
 
       const appointmentQuery = `
@@ -59,23 +58,69 @@ const resolvers = {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *;
       `;
-      const updateScheduleQuery = `
-        UPDATE "DocSchedules"
-        SET total_patients = total_patients - 1,
-            "YourTime" = (
-              SELECT TO_CHAR(
-                TO_TIMESTAMP("YourTime", 'HH24:MI') + INTERVAL '1 minute' * "onePatientDuration",
-                'HH24:MI'
-              )
-              FROM "DocSchedules"
-              WHERE id = $1
-            )
-        WHERE id = $1 AND total_patients > 0
-        RETURNING total_patients, "YourTime";
+
+      const getAppointmentNumberQuery = `
+        SELECT COUNT(*) + 1 AS appointment_number
+        FROM "Appointment"
+        WHERE available_day = $1;
       `;
+
+      const getLastYourTimeQuery = `
+        SELECT "yourTime"
+        FROM "Appointment"
+        WHERE available_day = $1
+        ORDER BY "yourTime" DESC
+        LIMIT 1;
+      `;
+
+      const getOnePatientDurationQuery = `
+        SELECT "onePatientDuration", "time"
+        FROM "DocSchedules"
+        WHERE id = $1;
+      `;
+
       try {
         // Start a transaction
         await pool.query("BEGIN");
+
+        // Calculate the appointment number for the given day
+        const appointmentNumberResult = await pool.query(
+          getAppointmentNumberQuery,
+          [available_day]
+        );
+        const appointment_number =
+          appointmentNumberResult.rows[0].appointment_number;
+
+        // Get the onePatientDuration and default start time from the schedule
+        const scheduleResult = await pool.query(getOnePatientDurationQuery, [
+          schedule_id,
+        ]);
+        if (scheduleResult.rows.length === 0) {
+          throw new Error("Invalid schedule ID.");
+        }
+        const { onePatientDuration, time: defaultStartTime } =
+          scheduleResult.rows[0];
+
+        // Calculate the next available "YourTime"
+        const lastYourTimeResult = await pool.query(getLastYourTimeQuery, [
+          available_day,
+        ]);
+        let nextYourTime;
+        if (lastYourTimeResult.rows.length === 0) {
+          // If no appointments exist for the day, start with the default start time
+          nextYourTime = defaultStartTime;
+        } else {
+          // Increment the last "YourTime" by onePatientDuration
+          const lastYourTime = lastYourTimeResult.rows[0].yourTime;
+          nextYourTime = await pool.query(
+            `SELECT TO_CHAR(
+              TO_TIMESTAMP($1, 'HH24:MI') + INTERVAL '1 minute' * $2,
+              'HH24:MI'
+            ) AS next_time;`,
+            [lastYourTime, onePatientDuration]
+          );
+          nextYourTime = nextYourTime.rows[0].next_time;
+        }
 
         // Insert the appointment
         const appointmentResult = await pool.query(appointmentQuery, [
@@ -85,7 +130,7 @@ const resolvers = {
           doc_specialist,
           available_day,
           session_time,
-          appointment_number,
+          appointment_number, // Use the calculated appointment number
           reason,
           image_url,
           patient_id,
@@ -93,18 +138,8 @@ const resolvers = {
           patient_dob,
           patient_phone,
           schedule_id,
-          yourTime, // Pass yourTime to the query
+          nextYourTime, // Use the calculated "YourTime"
         ]);
-
-        // Update the total_patients and YourTime in DocSchedules
-        const scheduleResult = await pool.query(updateScheduleQuery, [
-          schedule_id,
-        ]);
-        if (scheduleResult.rows.length === 0) {
-          throw new Error(
-            "Failed to update schedule: No patients left or invalid schedule ID."
-          );
-        }
 
         // Commit the transaction
         await pool.query("COMMIT");
