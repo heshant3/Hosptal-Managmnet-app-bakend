@@ -17,6 +17,7 @@ const typeDefs = gql`
     patient_dob: String
     patient_phone: String
     schedule_id: Int
+    yourTime: String
   }
 
   type AddAppointmentResponse {
@@ -35,23 +36,26 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addAppointment(
-      doc_id: Int!
-      doc_name: String
-      hospital_name: String
-      doc_specialist: String
-      available_day: String
-      session_time: String
-      appointment_number: Int
-      reason: String
-      image_url: String
-      patient_id: Int
-      patient_name: String
-      patient_dob: String
-      patient_phone: String
-      schedule_id: Int
-    ): AddAppointmentResponse
+    addAppointment(input: AddAppointmentInput!): AddAppointmentResponse
     deleteAppointment(appointment_id: Int!): DeleteAppointmentResponse
+  }
+
+  input AddAppointmentInput {
+    doc_id: Int!
+    doc_name: String
+    hospital_name: String
+    doc_specialist: String
+    available_day: String
+    session_time: String
+    appointment_number: Int
+    reason: String
+    image_url: String
+    patient_id: Int
+    patient_name: String
+    patient_dob: String
+    patient_phone: String
+    schedule_id: Int
+    yourTime: String
   }
 `;
 

@@ -32,14 +32,13 @@ const resolvers = {
     },
   },
   Mutation: {
-    addAppointment: async (
-      _,
-      {
+    addAppointment: async (_, { input }) => {
+      const {
         doc_id,
         doc_name,
         hospital_name,
         doc_specialist,
-        available_day,
+        available_day, // Ensure this is treated as a string
         session_time,
         appointment_number,
         reason,
@@ -49,14 +48,15 @@ const resolvers = {
         patient_dob,
         patient_phone,
         schedule_id,
-      }
-    ) => {
+        yourTime, // Added yourTime field
+      } = input;
+
       const appointmentQuery = `
         INSERT INTO "Appointment" (
           doc_id, doc_name, hospital_name, doc_specialist, available_day, session_time,
-          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id
+          appointment_number, reason, image_url, patient_id, patient_name, patient_dob, patient_phone, schedule_id, "yourTime"
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *;
       `;
       const updateScheduleQuery = `
@@ -93,6 +93,7 @@ const resolvers = {
           patient_dob,
           patient_phone,
           schedule_id,
+          yourTime, // Pass yourTime to the query
         ]);
 
         // Update the total_patients and YourTime in DocSchedules
@@ -110,7 +111,7 @@ const resolvers = {
 
         return {
           appointment: appointmentResult.rows[0],
-          message: `Appointment added successfully. Remaining patients: ${scheduleResult.rows[0].total_patients}, Next available time: ${scheduleResult.rows[0].YourTime}`,
+          message: `Appointment added successfully.`,
         };
       } catch (err) {
         // Rollback the transaction in case of an error
