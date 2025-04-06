@@ -31,9 +31,27 @@ const typeDefs = gql`
     adminId: ID
   }
 
+  type DoctorsDetailsResponse {
+    doctors: [DoctorData]
+    totalCount: Int
+  }
+
+  type PatientsDetailsResponse {
+    patients: [PatientData]
+    totalCount: Int
+  }
+
+  type AppointmentsDetailsResponse {
+    appointments: [Appointment]
+    totalCount: Int
+  }
+
   type Query {
     getAdminProfile(admin_id: Int!): AdminProfile
     getReferencedPatients(admin_id: Int!): [PatientData]
+    getAllDoctorsDetails: DoctorsDetailsResponse
+    getAllPatientsDetails: PatientsDetailsResponse
+    getAllAppointmentsDetails: AppointmentsDetailsResponse
   }
 
   type Mutation {
@@ -49,7 +67,7 @@ const typeDefs = gql`
       address: String!
       mobile: String!
     ): AddAdminProfileResponse
-    Login(email: String!, password: String!): LoginResponse
+    AdminLogin(email: String!, password: String!): LoginResponse
   }
 `;
 

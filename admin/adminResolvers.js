@@ -3,6 +3,9 @@ const {
   addAdminProfile,
   getAdminProfile,
   getReferencedPatients,
+  getAllDoctorsDetails,
+  getAllPatientsDetails,
+  getAllAppointmentsDetails,
 } = require("./adminData");
 
 const resolvers = {
@@ -33,7 +36,7 @@ const resolvers = {
         return { profile: null, message: err.message };
       }
     },
-    Login: async (_, { email, password }) => {
+    AdminLogin: async (_, { email, password }) => {
       try {
         const response = await Login(email, password);
         response.message = response.adminId
@@ -58,6 +61,30 @@ const resolvers = {
         return await getReferencedPatients(admin_id);
       } catch (err) {
         throw new Error("Error fetching referenced patients: " + err.message);
+      }
+    },
+    getAllDoctorsDetails: async () => {
+      try {
+        const { doctors, totalCount } = await getAllDoctorsDetails();
+        return { doctors, totalCount };
+      } catch (err) {
+        throw new Error("Error fetching doctors details: " + err.message);
+      }
+    },
+    getAllPatientsDetails: async () => {
+      try {
+        const { patients, totalCount } = await getAllPatientsDetails();
+        return { patients, totalCount };
+      } catch (err) {
+        throw new Error("Error fetching patients details: " + err.message);
+      }
+    },
+    getAllAppointmentsDetails: async () => {
+      try {
+        const { appointments, totalCount } = await getAllAppointmentsDetails();
+        return { appointments, totalCount };
+      } catch (err) {
+        throw new Error("Error fetching appointments details: " + err.message);
       }
     },
   },
