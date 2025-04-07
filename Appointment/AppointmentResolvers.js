@@ -1,4 +1,5 @@
 const pool = require("../db/pool");
+const { sendEmail, sendReminderEmail } = require("../utils/emailSender"); // Import reminder email function
 
 const resolvers = {
   Query: {
@@ -145,6 +146,44 @@ const resolvers = {
           "Confirmed", // Set status to "confirmed"
           price, // Added price value
         ]);
+
+        // Send email to the patient
+        const emailSubject = "Appointment Confirmation";
+        const emailText = `Dear ${patient_name},\n\nYour appointment has been confirmed.\n\nDetails:\nAppointment Number: ${appointment_number}\nYour Time: ${nextYourTime}\nDoctor: ${doc_name}\nHospital: ${hospital_name}\nDate: ${available_day}\nTime: ${session_time}\n\nThank you for choosing our service.`;
+        const emailHtml = `
+          <p>Dear ${patient_name},</p>
+          <p>Your appointment has been confirmed.</p>
+          <p><strong>Details:</strong></p>
+          <ul>   
+            <li>Doctor: ${doc_name}</li>
+            <li>Hospital: ${hospital_name}</li>
+            <li>Appointment Number: ${appointment_number}</li>
+            <li>Your Time: ${nextYourTime}</li>
+            <li>Date: ${available_day}</li>
+            <li>Time: ${session_time}</li>
+          </ul>
+          <p>Thank you for choosing our service.</p>
+        `;
+
+        await sendEmail({
+          to: patient_email,
+          subject: emailSubject,
+          text: emailText,
+          html: emailHtml,
+        });
+
+        // Send reminder email if the appointment is before 10 AM
+        const appointmentHour = parseInt(nextYourTime.split(":")[0], 10);
+        if (appointmentHour < 10) {
+          await sendReminderEmail({
+            to: patient_email,
+            patient_name,
+            doc_name,
+            hospital_name,
+            available_day,
+            nextYourTime,
+          });
+        }
 
         // Commit the transaction
         await pool.query("COMMIT");
